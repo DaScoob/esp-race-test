@@ -1,0 +1,19 @@
+services:
+  race-api:
+    build: .
+    container_name: race-api
+    ports:
+      - "6017:8000"
+    env_file:
+      - .env
+    environment:
+      DB_PATH: /app/data/race.db
+      ONLINE_WINDOW_SECONDS: "15"
+      FRONTEND_ORIGIN: ""
+      UI_DIR: /app/ui
+      DOWNLOADS_DIR: /app/downloads
+    volumes:
+      - ./data:/app/data
+      - ../Interface:/app/ui:ro
+      - ../artifacts:/app/downloads:ro
+    restart: unless-stopped

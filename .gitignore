@@ -1,0 +1,21 @@
+# Local secrets
+Server/.env
+Firmware/esp-race-test/secrets.h
+
+# Runtime state and local tooling
+Server/data/
+Server/data-test/
+Server/.venv/
+Server/__pycache__/
+Server/app/**/__pycache__/
+Server/tests/**/__pycache__/
+.pytest_cache/
+**/.pio/
+.vscode/
+*.pyc
+*.db
+*.db-shm
+*.db-wal
+
+# Generated task archives are managed by the server artifact directory.
+artifacts/*.zip

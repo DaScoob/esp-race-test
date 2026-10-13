@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de" data-color-mode="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050b09">
+  <title>esp-race-test</title>
+  <link rel="icon" href="data:,">
+  <script>
+    (() => {
+      try {
+        const stored = localStorage.getItem("esp-race-test-color-mode");
+        const mode = stored === "light" ? "light" : "dark";
+        document.documentElement.dataset.colorMode = mode;
+      } catch (e) { document.documentElement.dataset.colorMode = "dark"; }
+    })();
+  </script>
+  <link rel="stylesheet" href="/ui/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+  <div class="scene" aria-hidden="true">
+    <div class="scene__grid"></div>
+    <div class="scene__wash"></div>
+    <div class="scene__grain"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand__dot" aria-hidden="true"></span>
+      <span class="brand__name">esp-race-test</span>
+      <span class="brand__tag">ECHTGERÄTE-TESTUMGEBUNG</span>
+    </div>
+    <div class="topbar__status">
+      <span class="pill" data-server-status role="status" aria-live="polite">Lade…</span>
+      <button class="button button--icon" type="button" data-theme-toggle aria-label="Farbmodus wechseln">◐</button>
+    </div>
+  </header>
+
+  <dialog class="auth-dialog" data-auth-dialog aria-labelledby="auth-title">
+    <form method="dialog" data-auth-form>
+      <h2 id="auth-title" class="auth-dialog__title">Admin-Key</h2>
+      <p class="auth-dialog__hint">Der Key wird nur im Speicher dieser Seite gehalten und als Header <code>X-Admin-Key</code> gesendet. Er wird nicht gespeichert, geloggt oder per URL übergeben.</p>
+      <p class="auth-dialog__error" data-auth-error role="alert" hidden>Zugriff verweigert: Admin-Key ungültig (401).</p>
+      <input class="field" type="password" name="admin-key" autocomplete="off" required
+             aria-label="Admin-Key" placeholder="Admin-Key eingeben" data-auth-input>
+      <button class="button button--primary" type="submit">Verbinden</button>
+    </form>
+  </dialog>
+
+  <main id="main" class="layout">
+    <section class="card card--wide" aria-labelledby="state-title">
+      <p class="eyebrow" id="state-title">Zustand</p>
+      <h2 class="card__title">Verbindung zum Server</h2>
+      <p class="state-line" data-connection-state>Lade…</p>
+      <p class="muted" data-last-fetch hidden></p>
+    </section>
+
+    <section class="card card--wide" aria-labelledby="devices-title">
+      <p class="eyebrow" id="devices-title">Geräte</p>
+      <h2 class="card__title">Angemeldete Gerätetest-Stationen</h2>
+      <p class="empty-note" data-empty-devices hidden>Keine echten Geräte registriert</p>
+      <ul class="device-list" data-device-list></ul>
+    </section>
+
+    <section class="card" aria-labelledby="pairing-title">
+      <p class="eyebrow" id="pairing-title">Kopplung</p>
+      <h2 class="card__title">ESP-NOW-Pairing anfordern</h2>
+      <div class="pairing-form">
+        <label class="label" for="pair-a">Gerät A</label>
+        <select class="field" id="pair-a" data-pair-select="a" aria-describedby="pair-hint"></select>
+        <label class="label" for="pair-b">Gerät B</label>
+        <select class="field" id="pair-b" data-pair-select="b" aria-describedby="pair-hint"></select>
+        <p class="hint" id="pair-hint" data-pair-hint>Kopplung nur für Geräte mit gleichem WLAN-Kanal, die der Server als online meldet.</p>
+        <button class="button button--primary" type="button" data-pair-submit>Koppeln</button>
+        <p class="feedback" data-pair-feedback role="status" aria-live="polite"></p>
+      </div>
+      <h3 class="card__subtitle">Commands</h3>
+      <ul class="command-list" data-command-list></ul>
+    </section>
+
+    <section class="card" aria-labelledby="events-title">
+      <p class="eyebrow" id="events-title">Ereignisse</p>
+      <h2 class="card__title">Echte Geräteereignisse</h2>
+      <p class="empty-note" data-empty-events hidden>Keine echten Ereignisse vom Server</p>
+      <ul class="event-list" data-event-list></ul>
+    </section>
+
+    <section class="card card--wide" aria-labelledby="checks-title">
+      <p class="eyebrow" id="checks-title">Abnahmeprüfungen</p>
+      <h2 class="card__title">Acht Akzeptanzprüfungen</h2>
+      <ul class="check-list" data-check-list></ul>
+      <p class="muted">Eine Prüfung wird erst dann als bestanden markiert, wenn das entsprechende echte Server- oder Geräteergebnis vorliegt.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Verbindung: derselbe Ursprung wie die API (relative <code>/api/v1/…</code>-Pfade)</span>
+    <span><a class="footer__link" href="/docs">API-Dokumentation</a></span>
+  </footer>
+
+  <template data-tpl-device>
+    <li class="device" data-device-id>
+      <div class="device__head">
+        <span class="device__id" data-d-id></span>
+        <span class="pill pill--ok" data-d-online hidden>online</span>
+        <span class="pill pill--danger" data-d-offline hidden>offline</span>
+      </div>
+      <dl class="device__facts">
+        <div><dt>Channel</dt><dd data-d-channel></dd></div>
+        <div><dt>RSSI</dt><dd data-d-rssi></dd></div>
+        <div><dt>Uptime</dt><dd data-d-uptime></dd></div>
+        <div><dt>Firmware</dt><dd data-d-firmware></dd></div>
+        <div><dt>Peer</dt><dd data-d-peer></dd></div>
+        <div><dt>Peer aktiv</dt><dd data-d-peer-active></dd></div>
+        <div><dt>Last seen</dt><dd data-d-last-seen></dd></div>
+      </dl>
+      <button class="button button--danger" type="button" data-d-unpair>Trennen</button>
+    </li>
+  </template>
+
+  <template data-tpl-event>
+    <li class="event">
+      <span class="event__time" data-e-time></span>
+      <span class="event__device" data-e-device></span>
+      <span class="event__type" data-e-type></span>
+      <details class="event__details"><summary>Details</summary><pre data-e-json></pre></details>
+    </li>
+  </template>
+
+  <template data-tpl-command>
+    <li class="command">
+      <span class="command__device" data-c-device></span>
+      <span class="command__action" data-c-action></span>
+      <span class="command__peer" data-c-peer></span>
+      <span class="pill" data-c-state></span>
+    </li>
+  </template>
+
+  <script type="module" src="/ui/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+services:
+  race-api:
+    container_name: race-api-test
+    ports: !override
+      - "127.0.0.1:6117:8000"
+    volumes:
+      - ./data-test:/app/data
+    environment:
+      DB_PATH: /app/data/race.db
